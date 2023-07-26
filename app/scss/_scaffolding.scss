@@ -1,0 +1,106 @@
+.visually-hidden:not(:focus):not(:active),
+input[type="checkbox"].visually-hidden,
+input[type="radio"].visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    border: 0;
+    padding: 0;
+    white-space: no-wrap;
+    clip-path: inset(100%);
+    clip: rect(0 0 0 0);
+    overflow: hidden;
+}
+
+::placeholder {
+	color: #666;
+}
+
+::selection {
+	background-color: $accent;
+	color: #fff;
+}
+
+body {
+	font-size: 32px;
+	min-width: 320px;
+	position: relative;
+	line-height: 1.65;
+	font-family: $default-font;
+	overflow-x: hidden;
+	// color: $text;
+	input, textarea {
+		border: #666 1px solid;
+		outline: none;
+		&:focus:required:invalid {
+			border-color: red;
+		}
+		&:required:valid {
+			border-color: green;
+		}
+	}
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.img-responsive {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	&.img-width {
+		width: 100%;
+	}
+}
+
+.button {
+  display: inline-block;
+  border: none;
+  color: #fff;
+  text-decoration: none;
+  // background-color: $accent;
+  padding: 15px 45px;
+  font-size: 13px;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 3px;
+  border-radius: 2px;
+  text-align: center;
+  position: relative;
+  outline: none;
+  transition: background-color .1s ease;
+  cursor: pointer;
+  &::after {
+    transition: background-color .2s ease;
+    position: absolute;
+    content: '';
+    height: 4px;
+    bottom: 0;
+    width: 100%;
+    // background-color: darken($accent, 50%);
+    opacity: .18;
+    border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
+    left: 0;
+  }
+  &:focus,
+  &:hover {
+    text-decoration: none;
+    color: #fff;
+  }
+  &:hover {
+    // background-color: lighten($accent, 5%);
+    &::after {
+      opacity: .22;
+    }
+  }
+  &:active {
+    // background-color: darken($accent, 5%);
+    &::after {
+      opacity: .32;
+    }
+  }
+}
