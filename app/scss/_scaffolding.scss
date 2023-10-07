@@ -22,6 +22,10 @@ input[type="radio"].visually-hidden {
 	color: #fff;
 }
 
+* {
+    scroll-behavior: smooth;
+}
+
 body {
 	font-size: 32px;
 	min-width: 320px;
