@@ -1,3 +1,5 @@
+@use 'index' as v;
+
 .visually-hidden:not(:focus):not(:active),
 input[type="checkbox"].visually-hidden,
 input[type="radio"].visually-hidden {
@@ -18,7 +20,7 @@ input[type="radio"].visually-hidden {
 }
 
 ::selection {
-	background-color: $accent;
+	background-color: v.$accent;
 	color: #fff;
 }
 
@@ -31,9 +33,9 @@ body {
 	min-width: 320px;
 	position: relative;
 	line-height: 1.65;
-	font-family: $default-font;
+	font-family: v.$default-font;
 	overflow-x: hidden;
-	// color: $text;
+	// color: v.$text;
 	input, textarea {
 		border: #666 1px solid;
 		outline: none;
@@ -65,7 +67,7 @@ a {
   border: none;
   color: #fff;
   text-decoration: none;
-  // background-color: $accent;
+  // background-color: v.$accent;
   padding: 15px 45px;
   font-size: 13px;
   text-transform: uppercase;
@@ -84,7 +86,7 @@ a {
     height: 4px;
     bottom: 0;
     width: 100%;
-    // background-color: darken($accent, 50%);
+    // background-color: darken(v.$accent, 50%);
     opacity: .18;
     border-bottom-left-radius: 2px;
     border-bottom-right-radius: 2px;
@@ -96,13 +98,13 @@ a {
     color: #fff;
   }
   &:hover {
-    // background-color: lighten($accent, 5%);
+    // background-color: lighten(v.$accent, 5%);
     &::after {
       opacity: .22;
     }
   }
   &:active {
-    // background-color: darken($accent, 5%);
+    // background-color: darken(v.$accent, 5%);
     &::after {
       opacity: .32;
     }
