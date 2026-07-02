@@ -1,4 +1,5 @@
 import pkg from 'gulp';
+import path from 'path';
 const { src, dest, watch, parallel, series } = pkg;
 
 import changed from 'gulp-changed';
@@ -23,7 +24,11 @@ import notify from 'gulp-notify';
 
 // import del from 'del';
 
-import { deleteAsync } from 'del'
+import { deleteAsync } from 'del';
+
+import svgSprite from 'gulp-svg-sprite';
+import cheerio from 'gulp-cheerio';
+import replace from 'gulp-replace';
 
 import webp from 'gulp-webp';
 
@@ -31,53 +36,62 @@ import imagemin, { mozjpeg, optipng } from 'gulp-imagemin';
 
 // Пути к файлам
 const paths = {
-    src: 'app/img/src/**/*.{jpg,jpeg,png}', // Исходные картинки
-    dest: 'app/img/'                   // Папка назначения
+    imgs: {src: 'app/img/src/**/*.{jpg,jpeg,png}', dest: 'app/img/'},
+    icons: {src: 'app/img/icons/src/**/*.svg', dest: 'app/img/icons/', scssDest: 'app/scss/'} 
 };
 
 //Обработка изображений
 // 1. Таск для сжатия оригиналов (сверяет JPG/PNG с папкой назначения)
 export const compressPngJpg = () => {
-    return src(paths.src, { base: 'app/img/src', encoding: false })
-        .pipe(changed(paths.dest)) // Пропускает уже сжатые JPG/PNG
+    return src(paths.imgs.src, { base: 'app/img/src', encoding: false })
+        .pipe(changed(paths.imgs.dest)) // Пропускает уже сжатые JPG/PNG
         .pipe(imagemin([
             mozjpeg({ quality: 80, progressive: true }),
             optipng({ optimizationLevel: 5 })
         ]))
-        .pipe(dest(paths.dest))
+        .pipe(dest(paths.imgs.dest))
         .pipe(bs.stream());
 };
 
 // 2. Таск для создания WebP (сверяет исходники с расширением .webp в папке назначения)
 export const convertToWebp = () => {
-    return src(paths.src, { base: 'app/img/src', encoding: false })
-        .pipe(changed(paths.dest, { extension: '.webp' })) // Пропускает уже созданные .webp
+    return src(paths.imgs.src, { base: 'app/img/src', encoding: false })
+        .pipe(changed(paths.imgs.dest, { extension: '.webp' })) // Пропускает уже созданные .webp
         .pipe(webp({ quality: 75 }))
-        .pipe(dest(paths.dest))
+        .pipe(dest(paths.imgs.dest))
         .pipe(bs.stream());
 };
 
 // 3. Объединяем их в один общий таск для удобства
 export const processImages = parallel(compressPngJpg, convertToWebp);
 
-// export const processImages = () => {
-//     return src(paths.src, { base: 'app/img/src', encoding: false })
-//         .pipe(changed(paths.dest)) // Пропускает уже сжатые JPG/PNG
-//         // 1. Сжимаем исходные JPG/PNG перед конвертацией
-//         .pipe(imagemin([
-//             mozjpeg({ quality: 80, progressive: true }),
-//             optipng({ optimizationLevel: 5 })
-//         ]))
-//         // 2. Сохраняем сжатые оригиналы (JPG/PNG) в папку назначения
-//         .pipe(dest(paths.dest))
-//         .pipe(bs.stream())
-//         // 3. Конвертируем в WebP со сжатием качества
-//         .pipe(webp({
-//             quality: 75 // Коэффициент качества WebP (0-100)
-//         }))
-//         // 4. Сохраняем готовые файлы
-//         .pipe(dest(paths.dest));
-// };
+//SVG-спрайт с очисткой
+export function sprite() {
+    return src(paths.icons.src, { base: 'app/icons/src' })
+        .pipe(cheerio({
+            run: function ($) {
+                $('[fill]').removeAttr('fill'); 
+                $('[stroke]').removeAttr('stroke'); 
+                $('[style]').removeAttr('style'); 
+            },
+            parserOptions: { xmlMode: true }
+        }))
+        .pipe(replace('&gt;', '>'))
+        .pipe(svgSprite({
+            mode: {
+                symbol: { 
+                    sprite: '../sprite-mono.svg',
+                    render: {
+                        scss: {
+                            // Автоматически создает файл с оригинальными размерами иконок
+                            dest: '../../../../app/scss/_sprite-mono.scss'
+                        }
+                    }
+                }
+            }
+        }))
+        .pipe(dest(paths.icons.dest));
+}
 
 export async function styles() {
   return src('app/scss/**/*.scss')
@@ -125,6 +139,7 @@ export function watching() {
   watch(['app/js/main.js'], scripts);
   watch(['app/fonts/src'], fonts);
   watch(['app/img/src/**/*.{jpg,jpeg,png}'], processImages);
+  watch(['app/img/icons/src/**/*.svg'], sprite);
   watch(['app/*.html']).on('change', bs.reload);
 }
 
@@ -158,4 +173,4 @@ export function building() {
 // Экспорт задач
 // export default gulp.series(processImages);
 export const build = series(delDist, parallel(styles, scripts), building);
-export default parallel(styles, scripts, watching);
+export default parallel(styles, fonts, scripts, sprite, processImages, watching);
